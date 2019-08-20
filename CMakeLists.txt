@@ -11,6 +11,7 @@ catkin_package()
 
 catkin_install_python(
     PROGRAMS
+		scripts/offer_node
         scripts/registrator_node
     DESTINATION
         ${CATKIN_PACKAGE_BIN_DESTINATION}

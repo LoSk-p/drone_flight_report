@@ -4,39 +4,53 @@
 # ROS
 import rospy
 
-# Robonomics
-from ethereum_common.srv import Accounts, BlockNumber
-from robonomics_msgs.msg import Offer, Demand
-
 class Registrator:
-
     def __init__(self):
         rospy.init_node("registrator")
+        rospy.loginfo("Launching registrator node...")
 
-        rospy.wait_for_service('/eth/current_block')
-        rospy.wait_for_service('/eth/accounts')
-        self.accounts = rospy.ServiceProxy('/eth/accounts', Accounts)()
-        rospy.loginfo(str(self.accounts))  # AIRA ethereum addresses
+        rospy.Subscriber('/liability/ready', Liability, self.on_new_liability)
 
-        rospy.Subscriber('/liability/infochan/incoming/demand', Demand, self.on_incoming_demand)
+        rospy.wait_for_service('/liability/finish')
 
-        self.signing_offer = rospy.Publisher('/liability/infochan/eth/signing/offer', Offer, queue_size=128)
+        self.liability_proxy = namedtuple('liability_srvs_proxy', ['start', 'finish'])(
+                                          rospy.ServiceProxy('/liability/start', StartLiability),
+                                          rospy.ServiceProxy('/liability/finish', FinishLiability))
+
+        # For easy clean up after liability is executed
+        self.publishers = []
+        self.subscribers = []
 
         rospy.loginfo("Registrator node is launched!")
 
-    def on_incoming_demand(self, incoming):
-        rospy.loginfo('Incoming demand %s...', str(incoming))
-        if (incoming.model.multihash == rospy.get_param('~model') and incoming.token.address == rospy.get_param('~token')):
-            rospy.loginfo('For my model and token!')
-            log_hash = incoming.objective.multihash
-            res = self.check_objective(log_hash)
+    def on_new_liability(self, liability):
+        rospy.loginfo("Got new liability {}".format(liability.address))
+        rospy.loginfo('Starting process...')
 
-            if res:
-                self.make_offer(incoming)
-            else:
-                rospy.loginfo("File {} doesn't look good or unreachable".format(log_hash))
-        else:
-            rospy.loginfo('It is not for my model or token, skip it.')
+        prefix = '/liability/eth_' + liability.address.address
+
+        sub = rospy.Subscriber(prefix + '/liability', String, self.liability_id)
+        self.subscribers.append(sub)
+
+        sub = rospy.Subscriber(prefix + '/log_hash', String, self.read_log)
+
+        self.liability_proxy.start(liability.address.address)
+
+    def liability_id(self, liability):
+        pass
+
+    def read_log(self, log_hash):
+        pass
+
+    def clean(self):
+        for publisher in self.publishers:
+            publisher.unregister()
+
+        for subscriber in self.subscribers:
+            subscriber.unregister()
+
+        self.publishers = []
+        self.subscribers = []
 
     def spin(self):
         rospy.spin()

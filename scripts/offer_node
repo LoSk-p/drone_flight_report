@@ -1,0 +1,71 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+# ROS
+import rospy
+
+# Robonomics
+from ethereum_common.srv import Accounts, BlockNumber
+from ethereum_common.msg import Address, UInt256
+from robonomics_msgs.msg import Offer, Demand
+
+class OfferNode:
+
+    def __init__(self):
+        rospy.init_node("offer_node")
+        rospy.loginfo("Launching offer node...")
+
+        rospy.wait_for_service('/eth/current_block')
+        rospy.wait_for_service('/eth/accounts')
+        self.accounts = rospy.ServiceProxy('/eth/accounts', Accounts)()
+        rospy.loginfo(str(self.accounts))  # AIRA ethereum addresses
+
+        rospy.Subscriber('/liability/infochan/incoming/demand', Demand, self.on_incoming_demand)
+
+        self.signing_offer = rospy.Publisher('/liability/infochan/eth/signing/offer', Offer, queue_size=128)
+
+        rospy.loginfo("Offer node is launched!")
+
+    def on_incoming_demand(self, incoming):
+        rospy.loginfo('Incoming demand %s...', str(incoming))
+        if (incoming.model.multihash == rospy.get_param('~model') and incoming.token.address == rospy.get_param('~token')):
+            rospy.loginfo('For my model and token!')
+            log_hash = incoming.objective.multihash
+            res = self.check_objective(log_hash)
+
+            if res:
+                self.make_offer(incoming)
+            else:
+                rospy.loginfo("File {} doesn't look good or unreachable".format(log_hash))
+        else:
+            rospy.loginfo('It is not for my model or token, skip it.')
+
+    def make_deadline(self):
+        lifetime = int(rospy.get_param('~order_lifetime'))
+        deadline = rospy.ServiceProxy('/eth/current_block', BlockNumber)().number + lifetime
+        return UInt256(deadline)
+
+    def make_offer(self, demand):
+        rospy.loginfo('Making offer...')
+
+        offer = Offer()
+        offer.model = demand.model
+        offer.objective = demand.objective
+        offer.token = demand.token
+        offer.cost = demand.cost
+        offer.lighthouse = Address()
+        offer.lighthouse.address = rospy.get_param('~lighthouse')
+        offer.validator = demand.validator
+        offer.lighthouseFee = demand.lighthouseFee
+        offer.deadline = self.make_deadline()
+
+        self.signing_offer.publish(offer)
+        rospy.loginfo(offer)
+
+    def spin(self):
+        rospy.spin()
+
+
+if __name__ == "__main__":
+    OfferNode().spin()
+
