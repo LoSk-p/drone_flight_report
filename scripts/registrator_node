@@ -1,10 +1,22 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+# Standart, System and Third party
+from collections import namedtuple
+from datetime import datetime
+
 # ROS
 import rospy
+from std_msgs.msg import String
+
+# AIRA
+from robonomics_liability.msg import Liability
+from robonomics_liability.srv import StartLiability, FinishLiability
 
 class Registrator:
+
+    data_to_result = {}
+
     def __init__(self):
         rospy.init_node("registrator")
         rospy.loginfo("Launching registrator node...")
@@ -27,22 +39,51 @@ class Registrator:
         rospy.loginfo("Got new liability {}".format(liability.address))
         rospy.loginfo('Starting process...')
 
-        prefix = '/liability/eth_' + liability.address.address
+        self.currenct_liability = liability.address.address
 
+        prefix = '/liability/eth_' + self.currenct_liability
         sub = rospy.Subscriber(prefix + '/liability', String, self.liability_id)
         self.subscribers.append(sub)
 
         sub = rospy.Subscriber(prefix + '/log_hash', String, self.read_log)
+        self.subscribers.append(sub)
 
-        self.liability_proxy.start(liability.address.address)
+        self.pub_status = rospy.Publisher(prefix + '/status', String, queue_size=128)
+        self.publishers.append(self.pub_status)
+
+        self.pub_timestamp = rospy.Publisher(prefix + '/timestamp', String, queue_size=128)
+        self.publishers.append(self.pub_timestamp)
+
+        self.liability_proxy.start(self.currenct_liability)
 
     def liability_id(self, liability):
-        pass
+        self.data_to_result["liability"] = liability.data
+        if len(self.data_to_result) == 2:
+            self.finish_liabilitiy()
 
     def read_log(self, log_hash):
-        pass
+        self.data_to_result["log_hash"] = log_hash.data
+        if len(self.data_to_result) == 2:
+            self.finish_liabilitiy()
+
+    def finish_liabilitiy(self):
+        rospy.loginfo("Finishing liability...")
+
+        # TODO
+        # Somehow check the availibility of the file
+        self.pub_status.publish(String("True"))
+
+        timestamp = datetime.now().isoformat()
+        self.pub_timestamp.publish(String(timestamp))
+
+        rospy.loginfo("Waiting to publish the data")
+        rospy.sleep(4)
+
+        self.liability_proxy.finish(self.currenct_liability, True)
+        self.clean()
 
     def clean(self):
+        rospy.loginfo("Cleaning up...")
         for publisher in self.publishers:
             publisher.unregister()
 
@@ -51,6 +92,7 @@ class Registrator:
 
         self.publishers = []
         self.subscribers = []
+        self.data_to_result = {}
 
     def spin(self):
         rospy.spin()

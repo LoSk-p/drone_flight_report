@@ -1,5 +1,5 @@
 <launch>
-    <node name="offer_node" pkgs="drone_flight_report" type="offer_node" output="screen">
+    <node name="offer_node" pkg="drone_flight_report" type="offer_node" output="screen">
         <param name="model" value="QmXi1UDYqcaV2QapKhoAtVJNSEnJtP2M21p5YgR5PzYFQp" />
         <param name="token" value="0x966EbbFD7ECbCF44b1e05341976e0652CFA01360" />
         <param name="lighthouse" value="0x202a09A451DE674d2d65Bf1C90968a8d8F72cf7b" />

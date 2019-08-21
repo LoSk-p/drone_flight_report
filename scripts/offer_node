@@ -40,10 +40,15 @@ class OfferNode:
         else:
             rospy.loginfo('It is not for my model or token, skip it.')
 
+    def check_objective(self, loh_hash):
+        # TODO
+        # Somehow check the file
+        return True
+
     def make_deadline(self):
         lifetime = int(rospy.get_param('~order_lifetime'))
         deadline = rospy.ServiceProxy('/eth/current_block', BlockNumber)().number + lifetime
-        return UInt256(deadline)
+        return UInt256(uint256=str(deadline))
 
     def make_offer(self, demand):
         rospy.loginfo('Making offer...')
@@ -56,7 +61,7 @@ class OfferNode:
         offer.lighthouse = Address()
         offer.lighthouse.address = rospy.get_param('~lighthouse')
         offer.validator = demand.validator
-        offer.lighthouseFee = demand.lighthouseFee
+        offer.lighthouseFee = UInt256(uint256="0")
         offer.deadline = self.make_deadline()
 
         self.signing_offer.publish(offer)
