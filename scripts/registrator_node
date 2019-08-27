@@ -13,6 +13,10 @@ from std_msgs.msg import String
 from robonomics_liability.msg import Liability
 from robonomics_liability.srv import StartLiability, FinishLiability
 
+from tempfile import gettempdir
+import ipfsapi
+import os
+
 class Registrator:
 
     data_to_result = {}
@@ -66,13 +70,25 @@ class Registrator:
         if len(self.data_to_result) == 2:
             self.finish_liabilitiy()
 
+    def ipfs_download_file(self, ipfs_hash):
+        ipfs_client = ipfsapi.connect()
+        try:
+            tempdir = gettempdir()
+            os.chdir(tempdir)
+            ipfs_client.get(ipfs_hash, timeout=30)
+        except Exception as e:
+            rospy.logwarn("Failed to download %s with exception: %s", ipfs_hash, e)
+            return False
+        return True
+
     def finish_liabilitiy(self):
         rospy.loginfo("Finishing liability...")
 
-        # TODO
-        # Somehow check the availibility of the file
-        self.pub_status.publish(String("True"))
+        rospy.loginfo("Getting status")
+        status = self.ipfs_download_file(self.data_to_result["log_hash"])
+        self.pub_status.publish(String(str(status)))
 
+        rospy.loginfo("Getting time stamp")
         timestamp = datetime.now().isoformat()
         self.pub_timestamp.publish(String(timestamp))
 

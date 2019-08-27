@@ -30,20 +30,9 @@ class OfferNode:
         rospy.loginfo('Incoming demand %s...', str(incoming))
         if (incoming.model.multihash == rospy.get_param('~model') and incoming.token.address == rospy.get_param('~token')):
             rospy.loginfo('For my model and token!')
-            log_hash = incoming.objective.multihash
-            res = self.check_objective(log_hash)
-
-            if res:
-                self.make_offer(incoming)
-            else:
-                rospy.loginfo("File {} doesn't look good or unreachable".format(log_hash))
+            self.make_offer(incoming)
         else:
             rospy.loginfo('It is not for my model or token, skip it.')
-
-    def check_objective(self, loh_hash):
-        # TODO
-        # Somehow check the file
-        return True
 
     def make_deadline(self):
         lifetime = int(rospy.get_param('~order_lifetime'))
