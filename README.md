@@ -52,7 +52,7 @@ systemd.services.drone_flight_report = {
       wantedBy = [ "multi-user.target" ];
       script = ''
         source /root/drone_flight_report/result/setup.bash \
-        && roslaunch de_direct agent.launch
+        && roslaunch drone_flight_report agent.launch
       '';
       serviceConfig = {
         Restart = "on-failure";
