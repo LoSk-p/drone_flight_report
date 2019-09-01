@@ -41,7 +41,7 @@ class Registrator:
 
     def on_new_liability(self, liability):
         rospy.loginfo("Got new liability {}".format(liability.address))
-        if liability.model.multihash != rospy.get_param('~model'):
+        if liability.model.multihash != rospy.get_param('/offer_node/model'):
             rospy.loginfo("The liability is not for me")
             return
 
@@ -99,8 +99,8 @@ class Registrator:
         rospy.loginfo("Waiting to publish the data")
         rospy.sleep(4)
 
-        self.liability_proxy.finish(self.currenct_liability, True)
         self.clean()
+        self.liability_proxy.finish(self.currenct_liability, True)
 
     def clean(self):
         rospy.loginfo("Cleaning up...")
