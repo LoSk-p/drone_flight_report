@@ -98,17 +98,18 @@ class Registrator:
 
         rospy.loginfo("Waiting to publish the data")
         rospy.sleep(4)
-
         self.clean()
-        self.liability_proxy.finish(self.currenct_liability, True)
 
     def clean(self):
         rospy.loginfo("Cleaning up...")
-        for publisher in self.publishers:
-            publisher.unregister()
 
         for subscriber in self.subscribers:
             subscriber.unregister()
+
+        self.liability_proxy.finish(self.currenct_liability, True)
+
+        for publisher in self.publishers:
+            publisher.unregister()
 
         self.publishers = []
         self.subscribers = []
