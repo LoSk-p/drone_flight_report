@@ -7,7 +7,7 @@
 mkRosPackage rec {
   name = "${pname}-${version}";
   pname = "drone_flight_report";
-  version = "master";
+  version = "0.4.0";
 
   src = ./.;
 
@@ -15,7 +15,7 @@ mkRosPackage rec {
 
   meta = with stdenv.lib; {
     description = "Service to register a drone flight via Robonmics Network";
-    homepage = http://github.com/vourhey/drone_flight_report;
+    homepage = http://github.com/DistributedSky/drone_flight_report;
     license = licenses.bsd3;
     maintainers = with maintainers; [ vourhey ];
   };
