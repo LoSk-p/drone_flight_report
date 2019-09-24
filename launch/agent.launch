@@ -1,8 +1,11 @@
 <launch>
+    <arg name="lighthouse" default="0xA02500497E5163DbC049453509Fae8C9825cf18e" />
+    <arg name="token" default="0x7dE91B204C1C737bcEe6F000AAA6569Cf7061cb7" />
+
     <node name="offer_node" pkg="drone_flight_report" type="offer_node" output="screen">
         <param name="model" value="QmXi1UDYqcaV2QapKhoAtVJNSEnJtP2M21p5YgR5PzYFQp" />
-        <param name="token" value="0x966EbbFD7ECbCF44b1e05341976e0652CFA01360" />
-        <param name="lighthouse" value="0x202a09A451DE674d2d65Bf1C90968a8d8F72cf7b" />
+        <param name="token" value="$(arg token)" />
+        <param name="lighthouse" value="$(arg lighthouse)" />
         <param name="order_lifetime" value="100" />
    </node>
 
