@@ -11,7 +11,10 @@ mkRosPackage rec {
 
   src = ./.;
 
-  propagatedBuildInputs = [ robonomics_comm ];
+  propagatedBuildInputs = [
+    robonomics_comm
+    pkgs.python3Packages.ipfshttpclient
+  ];
 
   meta = with stdenv.lib; {
     description = "Service to register a drone flight via Robonmics Network";

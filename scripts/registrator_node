@@ -14,7 +14,7 @@ from robonomics_liability.msg import Liability
 from robonomics_liability.srv import StartLiability, FinishLiability
 
 from tempfile import gettempdir
-import ipfsapi
+import ipfshttpclient
 import os
 
 class Registrator:
@@ -75,7 +75,7 @@ class Registrator:
             self.finish_liabilitiy()
 
     def ipfs_download_file(self, ipfs_hash):
-        ipfs_client = ipfsapi.connect()
+        ipfs_client = ipfshttpclient.connect()
         try:
             tempdir = gettempdir()
             os.chdir(tempdir)
