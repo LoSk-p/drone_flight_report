@@ -1,7 +1,7 @@
 { pkgs ? import <nixpkgs> { }
 , stdenv
 , mkRosPackage
-, robonomics_comm_nightly
+, robonomics_comm-nightly
 }:
 
 mkRosPackage rec {
@@ -12,7 +12,7 @@ mkRosPackage rec {
   src = ./.;
 
   propagatedBuildInputs = [
-    robonomics_comm_nightly
+    robonomics_comm-nightly
     pkgs.python3Packages.ipfshttpclient
   ];
 
