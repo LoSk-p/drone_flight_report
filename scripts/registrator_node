@@ -47,9 +47,9 @@ class Registrator:
 
         rospy.loginfo('Starting process...')
 
-        self.currenct_liability = liability.address.address
+        self.currenct_liability = liability.address
 
-        prefix = '/liability/eth_' + self.currenct_liability
+        prefix = '/liability/eth_' + self.currenct_liability.address
         sub = rospy.Subscriber(prefix + '/liability', String, self.liability_id)
         self.subscribers.append(sub)
 
