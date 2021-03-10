@@ -1,5 +1,5 @@
 <launch>
-    <arg name="lighthouse" default="0xA02500497E5163DbC049453509Fae8C9825cf18e" />
+    <arg name="lighthouse" default="0xD40AC7F1e5401e03D00F5aeC1779D8e5Af4CF9f1" />
     <arg name="token" default="0x7dE91B204C1C737bcEe6F000AAA6569Cf7061cb7" />
 
     <node name="offer_node" pkg="drone_flight_report" type="offer_node" output="screen">
